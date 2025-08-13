@@ -46,14 +46,20 @@ export default function LoginPage() {
       let result;
       if (isSignup) {
         result = await signup(formData.name, formData.email, formData.password);
+        if (result.success) {
+          alert('Account created successfully! Please login.');
+          setIsSignup(false); // Switch to login mode
+          setFormData({ name: '', email: formData.email, password: '', confirmPassword: '' });
+        } else {
+          setError(result.error);
+        }
       } else {
         result = await login(formData.email, formData.password);
-      }
-
-      if (result.success) {
-        router.push('/animals');
-      } else {
-        setError(result.error);
+        if (result.success) {
+          router.push('/animals');
+        } else {
+          setError(result.error);
+        }
       }
     } catch (error) {
       setError('Something went wrong. Please try again.');

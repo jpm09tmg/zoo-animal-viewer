@@ -37,12 +37,7 @@ export async function POST(request) {
 
     return NextResponse.json({
       success: true,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      }
+      message: 'Account created successfully. Please login.'
     });
 
   } catch (error) {

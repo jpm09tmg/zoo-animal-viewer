@@ -1,46 +1,25 @@
 'use client';
-import { useState, useEffect, createContext, useContext } from 'react';
+import { useSession, signIn, signOut } from 'next-auth/react';
 
-const AuthContext = createContext();
-
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedUser = localStorage.getItem('user');
-      if (savedUser) {
-        try {
-          setUser(JSON.parse(savedUser));
-        } catch (error) {
-          console.error('Error parsing saved user:', error);
-          localStorage.removeItem('user');
-        }
-      }
-    }
-    setLoading(false);
-  }, []);
+export const useAuth = () => {
+  const { data: session, status } = useSession();
+  
+  const loading = status === 'loading';
+  const user = session?.user || null;
 
   const login = async (email, password) => {
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false
       });
-      
-      const result = await response.json();
-      
-      if (result.success) {
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('user', JSON.stringify(result.user));
-        }
-        setUser(result.user);
-        return { success: true };
-      } else {
-        return { success: false, error: result.error };
+
+      if (result?.error) {
+        return { success: false, error: 'Invalid email or password' };
       }
+
+      return { success: true };
     } catch (error) {
       return { success: false, error: 'Login failed' };
     }
@@ -55,50 +34,26 @@ export function AuthProvider({ children }) {
       });
       
       const result = await response.json();
-      
-      if (result.success) {
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('user', JSON.stringify(result.user));
-        }
-        setUser(result.user);
-        return { success: true };
-      } else {
-        return { success: false, error: result.error };
-      }
+      return result;
     } catch (error) {
       return { success: false, error: 'Signup failed' };
     }
   };
 
-  const logout = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('user');
-    }
-    setUser(null);
+  const logout = async () => {
+    await signOut({ redirect: false });
   };
 
   const isAdmin = () => {
     return user && user.role === 'admin';
   };
 
-  return (
-    <AuthContext.Provider value={{ 
-      user, 
-      login, 
-      signup, 
-      logout, 
-      loading,
-      isAdmin
-    }}>
-      {children}
-    </AuthContext.Provider>
-  );
-}
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
-  }
-  return context;
+  return { 
+    user, 
+    login, 
+    signup, 
+    logout, 
+    loading,
+    isAdmin
+  };
 };

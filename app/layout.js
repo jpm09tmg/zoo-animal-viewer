@@ -1,5 +1,5 @@
 import './globals.css';
-import { AuthProvider } from './hooks/useAuth';
+import Providers from './components/Providers';
 
 export const metadata = {
   title: 'Zoo Animal Viewer',
@@ -10,9 +10,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <AuthProvider>
+        <Providers>
           {children}
-        </AuthProvider>
+        </Providers>
       </body>
     </html>
   );
