@@ -139,7 +139,7 @@ export default function AnimalsPage() {
         <div className="mb-6">
           <h2 className="text-2xl font-semibold text-gray-800 mb-2">
             {selectedCategory ? 
-              `${categories.find(c => c.name === selectedCategory)?.displayName || selectedCategory} Animals` : 
+              `${categories.find(c => c.name === selectedCategory)?.displayName || selectedCategory}` : 
               'All Animals'
             }
             <span className="text-lg text-gray-500 ml-2">({animals.length})</span>
